@@ -20,7 +20,7 @@ use vars qw($VERSION @EXPORT @EXPORT_OK %EXPORT_TAGS @ISA);
 
 #use Data::Dumper;
 
-$VERSION = '0.02';
+$VERSION = '0.03';
 @ISA = qw(Exporter);
 @EXPORT = qw();
 @EXPORT_OK = qw(
@@ -512,7 +512,7 @@ use Bib::CrossRef qw(:all);
 
 =head1 VERSION
  
-Ver 0.02
+Ver 0.03
  
 =head1 AUTHOR
  
