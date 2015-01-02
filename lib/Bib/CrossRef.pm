@@ -20,12 +20,12 @@ use vars qw($VERSION @EXPORT @EXPORT_OK %EXPORT_TAGS @ISA);
 
 #use Data::Dumper;
 
-$VERSION = '0.01';
+$VERSION = '0.02';
 @ISA = qw(Exporter);
 @EXPORT = qw();
 @EXPORT_OK = qw(
-sethtml clearhtml set_details print printheader printfooter
-doi score date atitle jtitle volume issue genre spage epage authcount auth
+sethtml clearhtml parse_text print printheader printfooter
+doi score date atitle jtitle volume issue genre spage epage authcount auth query
 );
 %EXPORT_TAGS = (all => \@EXPORT_OK);
 
@@ -59,9 +59,21 @@ sub doi {
   return $self->{ref}->{'doi'};
 }
 
+sub _setdoi {
+  my $self = shift @_;
+  my $val = shift @_;
+  $self->{ref}->{'doi'}=$val;
+}
+
 sub score {
   my $self = shift @_;
   return $self->{ref}->{'score'};
+}
+
+sub _setscore {
+  my $self = shift @_;
+  my $val = shift @_;
+  $self->{ref}->{'score'}=$val;
 }
 
 sub atitle {
@@ -69,9 +81,21 @@ sub atitle {
   return $self->{ref}->{'atitle'};
 }
 
+sub _setatitle {
+  my $self = shift @_;
+  my $val = shift @_;
+  $self->{ref}->{'atitle'}=$val;
+}
+
 sub jtitle {
   my $self = shift @_;
   return $self->{ref}->{'jtitle'};
+}
+
+sub _setjtitle {
+  my $self = shift @_;
+  my $val = shift @_;
+  $self->{ref}->{'jtitle'}=$val;
 }
 
 sub volume {
@@ -79,9 +103,21 @@ sub volume {
   return $self->{ref}->{'volume'};
 }
 
+sub _setvolume {
+  my $self = shift @_;
+  my $val = shift @_;
+  $self->{ref}->{'volume'}=$val;
+}
+
 sub issue {
   my $self = shift @_;
   return $self->{ref}->{'issue'};
+}
+
+sub _setissue {
+  my $self = shift @_;
+  my $val = shift @_;
+  $self->{ref}->{'issue'}=$val;
 }
 
 sub date {
@@ -89,9 +125,21 @@ sub date {
   return $self->{ref}->{'date'};
 }
 
+sub _setdate {
+  my $self = shift @_;
+  my $val = shift @_;
+  $self->{ref}->{'date'}=$val;
+}
+
 sub genre {
   my $self = shift @_;
   return $self->{ref}->{'genre'};
+}
+
+sub _setgenre {
+  my $self = shift @_;
+  my $val = shift @_;
+  $self->{ref}->{'genre'}=$val;
 }
 
 sub spage {
@@ -99,9 +147,21 @@ sub spage {
   return $self->{ref}->{'spage'};
 }
 
+sub _setspage {
+  my $self = shift @_;
+  my $val = shift @_;
+  $self->{ref}->{'spage'}=$val;
+}
+
 sub epage {
   my $self = shift @_;
   return $self->{ref}->{'epage'};
+}
+
+sub _setepage {
+  my $self = shift @_;
+  my $val = shift @_;
+  $self->{ref}->{'epage'}=$val;
 }
 
 sub authcount {
@@ -109,13 +169,31 @@ sub authcount {
   return $self->{ref}->{'authcount'};
 }
 
+sub _setauthcount {
+  my $self = shift @_;
+  my $val = shift @_;
+  $self->{ref}->{'authcount'}=$val;
+}
+
 sub auth {
   my ($self, $num) = @_;
   return $self->{ref}->{'au'.$num};
 }
 
-sub set_details {
-  # given a raw string, use crossref.org to try to convert into a paper reference and doi
+sub _setauth {
+  my $self = shift @_;
+  my $i = shift @_;
+  my $val = shift @_;
+  $self->{ref}->{'au'.$i}=$val;
+}
+
+sub query {
+  my $self = shift @_;
+  return $self->{ref}->{'query'};
+}
+
+sub parse_text {
+  # given free format text, use crossref.org to try to convert into a paper reference and doi
   my ($self, $cites) = @_;
   
   my $cites_clean = $cites;
@@ -177,65 +255,65 @@ sub print {
   if ($self->{html}) {
     $out.=sprintf "%s", '<tr>';
     $out.=sprintf "%s",  '<td>'.$id.'</td>';
-    if (defined $ref->{'score'} && $ref->{'score'}<1) {
+    if ($self->score<1) {
       $out.=sprintf "%s",  '<td><input type="checkbox" name="'.$id.'" value=""></td>';
       $out.=sprintf "%s",  '<td style="color:red">Poor match</td>';
     } else {
       $out.=sprintf "%s",  '<td><input type="checkbox" name="'.$id.'" value="" checked></td><td></td>';
     }
-    $out.=sprintf "%s",  '<td contenteditable="true">'.$ref->{'genre'}.'</td><td contenteditable="true">'.$ref->{'date'}.'</td><td contenteditable="true">';
-    for (my $j = 1; $j <= $ref->{'authcount'}; $j++) {
-      $out.=sprintf "%s",  $ref->{'au'.$j}.', ';
+    $out.=sprintf "%s",  '<td contenteditable="true">'.$self->genre.'</td><td contenteditable="true">'.$self->date.'</td><td contenteditable="true">';
+    for (my $j = 1; $j <= $self->authcount; $j++) {
+      $out.=sprintf "%s",  $self->auth($j).', ';
     }
-    $out.=sprintf "%s",  '</td><td contenteditable="true">'.$ref->{'atitle'}.'</td><td contenteditable="true">'.encode_entities($ref->{'jtitle'}).'</td>';
+    $out.=sprintf "%s",  '</td><td contenteditable="true">'.$self->atitle.'</td><td contenteditable="true">'.encode_entities($self->jtitle).'</td>';
     $out.=sprintf "%s",  '<td contenteditable="true">';
-    if (defined $ref->{'volume'}) {
-      $out.=sprintf "%s",  $ref->{'volume'};
+    if (defined $self->volume) {
+      $out.=sprintf "%s",  $self->volume;
     }
     $out.=sprintf "%s",  '</td><td contenteditable="true">';
-    if (defined $ref->{'issue'}) {
-      $out.=sprintf "%s",  $ref->{'issue'};
+    if (defined $self->issue) {
+      $out.=sprintf "%s",  $self->issue;
     }
     $out.=sprintf "%s",  '</td><td contenteditable="true">';
-    if (defined $ref->{'spage'}) {
-      $out.=sprintf "%s",  $ref->{'spage'};
+    if (defined $self->spage) {
+      $out.=sprintf "%s",  $self->spage;
     }
-    if (defined $ref->{'epage'}) {
-      $out.=sprintf "%s",  '-'.$ref->{'epage'};
+    if (defined $self->epage) {
+      $out.=sprintf "%s",  '-'.$self->epage;
     }
     $out.=sprintf "%s",  '</td><td contenteditable="true">';
-    if (defined $ref->{'doi'}) {
-      $out.=sprintf "%s",  '<a href='.$ref->{'doi'}.'>'.$ref->{'doi'}.'</a>';
+    if (defined $self->doi) {
+      $out.=sprintf "%s",  '<a href='.$self->doi.'>'.$self->doi.'</a>';
     }
     $out.=sprintf "%s",  '</td></tr>'."\n";
-    $out.=sprintf "%s",  '<tr><td colspan=12 style="color:#C0C0C0">'.encode_entities($ref->{'query'}).'</td></tr>'."\n";
+    $out.=sprintf "%s",  '<tr><td colspan=12 style="color:#C0C0C0">'.encode_entities($self->query).'</td></tr>'."\n";
   } else {
     if (length($id)>0) {$out .= $id.". ";}
-    if (exists($ref->{'score'}) && $ref->{'score'}<1) {
-      $out.=sprintf "%s",  "Poor match (score=$ref->{'score'}):\n";
-      $out.=sprintf "%s",  "$ref->{'query'}\n";
+    if ($self->score<1) {
+      $out.=sprintf "%s",  'Poor match (score='.$self->score."):\n";
+      $out.=sprintf "%s", $self->query."\n";
     } else {
       #print "$count. ";
     }
-    $out.=sprintf "%s",  "$$ref{'genre'}: $$ref{'date'}, ";
-    for (my $j = 1; $j <= $ref->{'authcount'}; $j++) {
-      $out.=sprintf "%s",  $ref->{'au'.$j}.', ';
+    $out.=sprintf "%s",  $self->genre.': '.$self->date.", ";
+    for (my $j = 1; $j <= $self->authcount; $j++) {
+      $out.=sprintf "%s",  $self->auth($j).', ';
     }
-    $out.=sprintf "%s",  "\'$ref->{'atitle'}\'. $ref->{'jtitle'}";
-    if (defined $ref->{'volume'}) {
-      $out.=sprintf "%s",  ", $ref->{'volume'}";
-      if (defined $ref->{'issue'}) {
-        $out.=sprintf "%s",  "($ref->{'issue'})";
+    $out.=sprintf "%s",  "\'".$self->atitle."\'. ".$self->jtitle;
+    if (defined $self->volume) {
+      $out.=sprintf "%s",  ", ".$self->volume;
+      if (defined $self->issue) {
+        $out.=sprintf "%s",  "(".$self->issue.")";
       }
     }
-    if (defined $ref->{'spage'}) {
-      $out.=sprintf "%s",  ",pp$ref->{'spage'}";
+    if (defined $self->spage) {
+      $out.=sprintf "%s",  ",pp".$self->spage;
     }
-    if (defined $ref->{'epage'}) {
-      $out.=sprintf "%s",  '-'.$ref->{'epage'};
+    if (defined $self->epage) {
+      $out.=sprintf "%s",  '-'.$self->epage;
     }
-    if (defined $ref->{'doi'}) {
-      $out.=sprintf "%s",  ", DOI: $ref->{'doi'}";
+    if (defined $self->doi) {
+      $out.=sprintf "%s",  ", DOI: ".$self->doi;
     }
   }
   return $out;
@@ -259,7 +337,7 @@ Bib::CrossRef - Uses crossref to robustly parse bibliometric references.
 
 # Supply some details, Bib::CrossRef will do its best to use this to derive full citation details e.g. the DOI of a document ...
 
- $ref->set_details('10.1109/jstsp.2013.2251604');
+ $ref->parse_text('10.1109/jstsp.2013.2251604');
  
 # Show the full citation details, in human readable form
 
@@ -280,7 +358,7 @@ article: 2013, Alessandro Checco, Douglas J. Leith, 'Learning-Based Constraint S
 A valid DOI will always be resolved to a full citation
 e.g.
 
- $ref->set_details('10.1109/jstsp.2013.2251604');
+ $ref->sparse_text('10.1109/jstsp.2013.2251604');
  print $ref->print();
  
 article: 2013, Alessandro Checco, Douglas J. Leith, 'Learning-Based Constraint Satisfaction With Sensing Restrictions'. IEEE Journal of Selected Topics in Signal Processing, 7(5),pp811-820, DOI: http://dx.doi.org/10.1109/jstsp.2013.2251604
@@ -288,11 +366,11 @@ article: 2013, Alessandro Checco, Douglas J. Leith, 'Learning-Based Constraint S
 An attempt will be made to resolve almost any text containing citation info 
 e.g. article title only
 
- $ref->set_details('Learning-Based Constraint Satisfaction With Sensing Restrictions');
+ $ref->parse_text('Learning-Based Constraint Satisfaction With Sensing Restrictions');
 
 e.g. author and journal
 
-$ref->set_details('Alessandro Checco, Douglas J. Leith, IEEE Journal of Selected Topics in Signal Processing, 7(5)');
+$ref->parse_text('Alessandro Checco, Douglas J. Leith, IEEE Journal of Selected Topics in Signal Processing, 7(5)');
 
 Please bear in mind that crossref provides a great service for free -- don't abuse it by making excessive queries.  If making many queries, be
 sure to rate limit them to a sensible level or you will likely get blocked.
@@ -305,9 +383,9 @@ sure to rate limit them to a sensible level or you will likely get blocked.
 
 Creates a new Bib::CrossRef object
 
-=head2 set_details
+=head2 parse_text
 
- $ref->set_details($string)
+ $ref->parse_text($string)
 
 Provides a text string that Bib::CrossRef will try to resolve into a full citation with the help of crossref.org
 
@@ -385,6 +463,12 @@ Returns the start page
 
 Returns the end page
 
+=head2 query
+
+ my $info = $ref->query
+ 
+Returns the free form string from which full citation is derived
+
 =head2 print
 
  print $ref->printheader;
@@ -420,7 +504,7 @@ When html formatting is enabled, prints some html footer tags
 You can export the following functions if you do not want to use the object orientated interface:
 
 sethtml clearhtml set_details print printheader printfooter
-doi score date atitle jtitle volume issue genre spage epage authcount auth
+doi score date atitle jtitle volume issue genre spage epage authcount auth query
 
 The tag C<all> is available to easily export everything:
  
@@ -428,7 +512,7 @@ use Bib::CrossRef qw(:all);
 
 =head1 VERSION
  
-Ver 0.01
+Ver 0.02
  
 =head1 AUTHOR
  
