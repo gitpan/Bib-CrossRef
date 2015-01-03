@@ -18,5 +18,9 @@ no_index:
     - t
     - inc
 requires:
+  HTML::Entities: 0
+  JSON: 0
+  LWP::UserAgent: 0
   Test::More: 0
-version: 0.05
+  URI::Escape: 0
+version: 0.06

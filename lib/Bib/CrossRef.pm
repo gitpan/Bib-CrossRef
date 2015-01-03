@@ -20,7 +20,7 @@ use vars qw($VERSION @EXPORT @EXPORT_OK %EXPORT_TAGS @ISA);
 
 #use Data::Dumper;
 
-$VERSION = '0.05';
+$VERSION = '0.06';
 @ISA = qw(Exporter);
 @EXPORT = qw();
 @EXPORT_OK = qw(
@@ -399,7 +399,7 @@ e.g. article title only
 
 e.g. author and journal
 
-$ref->parse_text('Alessandro Checco, Douglas J. Leith, IEEE Journal of Selected Topics in Signal Processing, 7(5)');
+ $ref->parse_text('Alessandro Checco, Douglas J. Leith, IEEE Journal of Selected Topics in Signal Processing, 7(5)');
 
 Please bear in mind that crossref provides a great service for free -- don't abuse it by making excessive queries.  If making many queries, be
 sure to rate limit them to a sensible level or you will likely get blocked.
@@ -545,7 +545,7 @@ use Bib::CrossRef qw(:all);
 
 =head1 VERSION
  
-Ver 0.05
+Ver 0.06
  
 =head1 AUTHOR
  
