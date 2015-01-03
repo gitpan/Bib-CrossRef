@@ -20,7 +20,7 @@ use vars qw($VERSION @EXPORT @EXPORT_OK %EXPORT_TAGS @ISA);
 
 #use Data::Dumper;
 
-$VERSION = '0.03';
+$VERSION = '0.04';
 @ISA = qw(Exporter);
 @EXPORT = qw();
 @EXPORT_OK = qw(
@@ -63,6 +63,17 @@ sub _setdoi {
   my $self = shift @_;
   my $val = shift @_;
   $self->{ref}->{'doi'}=$val;
+}
+
+sub url {
+  my $self = shift @_;
+  return $self->{ref}->{'url'};
+}
+
+sub _seturl {
+  my $self = shift @_;
+  my $val = shift @_;
+  $self->{ref}->{'url'}=$val;
 }
 
 sub score {
@@ -210,6 +221,7 @@ sub parse_text {
     $ref->{'query'} = $cites;
     # extract doi and matching score
     $ref->{'doi'} = $json->[0]{'doi'};
+    $ref->{'url'} = $json->[0]{'doi'};
     $ref->{'score'} = $json->[0]{'score'}; #$json->[0]{'normalizedScore'};
     # and get the rest of the details from the coins encoded payload ...
     if (exists $json->[0]{'coins'}) {
@@ -238,7 +250,7 @@ sub parse_text {
 }
 
 sub printheader {
-  return  '<table><tr style="font-weight:bold"><td></td><td>Use</td><td></td><td>Type</td><td><Year></td><td>Authors</td><td>Title</td><td>Journal</td><td>Volume</td><td>Issue</td><td>Pages</td><td>DOI</td></tr>'."\n";
+  return  '<table><tr style="font-weight:bold"><td></td><td>Use</td><td></td><td>Type</td><td><Year></td><td>Authors</td><td>Title</td><td>Journal</td><td>Volume</td><td>Issue</td><td>Pages</td><td>DOI</td><td>url</td></tr>'."\n";
 }
 
 sub printfooter {
@@ -283,7 +295,13 @@ sub print {
     }
     $out.=sprintf "%s",  '</td><td contenteditable="true">';
     if (defined $self->doi) {
-      $out.=sprintf "%s",  '<a href='.$self->doi.'>'.$self->doi.'</a>';
+      my $doi = $self->doi;
+      $doi =~ s/http:\/\/dx.doi.org\///;
+      $out.=$doi;
+    }
+    $out.=sprintf "%s",  '</td><td contenteditable="true">';
+    if (defined $self->url) {
+      $out.=sprintf "%s",  '<a href='.$self->url.'>'.$self->url.'</a>';
     }
     $out.=sprintf "%s",  '</td></tr>'."\n";
     $out.=sprintf "%s",  '<tr><td colspan=12 style="color:#C0C0C0">'.encode_entities($self->query).'</td></tr>'."\n";
@@ -313,7 +331,12 @@ sub print {
       $out.=sprintf "%s",  '-'.$self->epage;
     }
     if (defined $self->doi) {
-      $out.=sprintf "%s",  ", DOI: ".$self->doi;
+      my $doi = $self->doi;
+      $doi =~ s/http:\/\/dx.doi.org\///;
+      $out.=sprintf "%s",  ", DOI: ".$doi;
+    }
+    if (defined $self->url) {
+      $out.=sprintf "%s",  ", ".$self->url;
     }
   }
   return $out;
@@ -463,6 +486,10 @@ Returns the start page
 
 Returns the end page
 
+=head2 url
+
+Return the url, if any
+
 =head2 query
 
  my $info = $ref->query
@@ -504,7 +531,7 @@ When html formatting is enabled, prints some html footer tags
 You can export the following functions if you do not want to use the object orientated interface:
 
 sethtml clearhtml set_details print printheader printfooter
-doi score date atitle jtitle volume issue genre spage epage authcount auth query
+doi score date atitle jtitle volume issue genre spage epage authcount auth query url
 
 The tag C<all> is available to easily export everything:
  
@@ -512,7 +539,7 @@ use Bib::CrossRef qw(:all);
 
 =head1 VERSION
  
-Ver 0.03
+Ver 0.04
  
 =head1 AUTHOR
  
