@@ -42,7 +42,7 @@ is($ref->epage,'1025');
 my $out;
 ok($out=$ref->print('2'));
 my $expected=<<"END";
-<tr><td>2</td><td><input type="checkbox" name="2" value="" checked></td><td></td><td contenteditable="true">article</td><td contenteditable="true">2015</td><td contenteditable="true">D. J. Leith, W. E. Leithead, </td><td contenteditable="true">Survey of gain-scheduling analysis and design</td><td contenteditable="true">International Journal of Control</td><td contenteditable="true">1</td><td contenteditable="true">2</td><td contenteditable="true">1001-1025</td><td contenteditable="true"><a href=http://dx.doi.org/10.1080/002071700411304>http://dx.doi.org/10.1080/002071700411304</a></td></tr>
+<tr><td>2</td><td><input type="checkbox" name="2" value="" checked></td><td></td><td contenteditable="true">article</td><td contenteditable="true">2015</td><td contenteditable="true">D. J. Leith, W. E. Leithead, </td><td contenteditable="true">Survey of gain-scheduling analysis and design</td><td contenteditable="true">International Journal of Control</td><td contenteditable="true">1</td><td contenteditable="true">2</td><td contenteditable="true">1001-1025</td><td contenteditable="true">10.1080/002071700411304</td><td contenteditable="true"></td></tr>
 <tr><td colspan=12 style="color:#C0C0C0"></td></tr>
 END
 is($out,$expected);
@@ -63,7 +63,7 @@ SKIP: {
   is($ref->doi,'http://dx.doi.org/10.1080/002071700411304');
   is($ref->doi(),'http://dx.doi.org/10.1080/002071700411304');
   ok($out=$ref->print('1'));
-  $expected="1. article: 2000, D. J. Leith, W. E. Leithead, 'Survey of gain-scheduling analysis and design'. International Journal of Control, 73(11),pp1001-1025, DOI: http://dx.doi.org/10.1080/002071700411304";
+  $expected="1. article: 2000, D. J. Leith, W. E. Leithead, 'Survey of gain-scheduling analysis and design'. International Journal of Control, 73(11),pp1001-1025, DOI: 10.1080/002071700411304, http://dx.doi.org/10.1080/002071700411304";
   is($out,$expected);
 }
 

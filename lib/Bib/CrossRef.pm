@@ -20,7 +20,7 @@ use vars qw($VERSION @EXPORT @EXPORT_OK %EXPORT_TAGS @ISA);
 
 #use Data::Dumper;
 
-$VERSION = '0.04';
+$VERSION = '0.05';
 @ISA = qw(Exporter);
 @EXPORT = qw();
 @EXPORT_OK = qw(
@@ -201,6 +201,12 @@ sub _setauth {
 sub query {
   my $self = shift @_;
   return $self->{ref}->{'query'};
+}
+
+sub _setquery {
+  my $self = shift @_;
+  my $val = shift @_;
+  $self->{ref}->{'query'}=$val;
 }
 
 sub parse_text {
@@ -539,7 +545,7 @@ use Bib::CrossRef qw(:all);
 
 =head1 VERSION
  
-Ver 0.04
+Ver 0.05
  
 =head1 AUTHOR
  
