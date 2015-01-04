@@ -20,7 +20,7 @@ use vars qw($VERSION @EXPORT @EXPORT_OK %EXPORT_TAGS @ISA);
 
 #use Data::Dumper;
 
-$VERSION = '0.06';
+$VERSION = '0.07';
 @ISA = qw(Exporter);
 @EXPORT = qw();
 @EXPORT_OK = qw(
@@ -256,11 +256,27 @@ sub parse_text {
 }
 
 sub printheader {
-  return  '<table><tr style="font-weight:bold"><td></td><td>Use</td><td></td><td>Type</td><td><Year></td><td>Authors</td><td>Title</td><td>Journal</td><td>Volume</td><td>Issue</td><td>Pages</td><td>DOI</td><td>url</td></tr>'."\n";
+  my $self = shift @_;
+  my $id = shift @_;
+  my $str = '';
+  if (defined $id) {$str = 'id="'.$id.'"';}
+  return  '<table '.$str.'><tr style="font-weight:bold"><td></td><td>Use</td><td></td><td>Type</td><td>Year</td><td>Authors</td><td>Title</td><td>Journal</td><td>Volume</td><td>Issue</td><td>Pages</td><td>DOI</td><td>url</td></tr>'."\n";
 }
 
 sub printfooter {
   return "</table>\n";
+}
+
+sub _authstring {
+  my $self = shift @_;
+  my $out='';
+  if ($self->authcount > 0) {
+    $out = $self->auth(1);
+    for (my $j = 2; $j <= $self->authcount; $j++) {
+      $out.=' and '.$self->auth($j);
+    }
+  }
+  return $out;
 }
 
 sub print {
@@ -271,7 +287,7 @@ sub print {
   
   my $out='';
   if ($self->{html}) {
-    $out.=sprintf "%s", '<tr>';
+    $out.=sprintf "%s", '<tr id="cite">';
     $out.=sprintf "%s",  '<td>'.$id.'</td>';
     if ($self->score<1) {
       $out.=sprintf "%s",  '<td><input type="checkbox" name="'.$id.'" value=""></td>';
@@ -279,11 +295,9 @@ sub print {
     } else {
       $out.=sprintf "%s",  '<td><input type="checkbox" name="'.$id.'" value="" checked></td><td></td>';
     }
-    $out.=sprintf "%s",  '<td contenteditable="true">'.$self->genre.'</td><td contenteditable="true">'.$self->date.'</td><td contenteditable="true">';
-    for (my $j = 1; $j <= $self->authcount; $j++) {
-      $out.=sprintf "%s",  $self->auth($j).', ';
-    }
-    $out.=sprintf "%s",  '</td><td contenteditable="true">'.$self->atitle.'</td><td contenteditable="true">'.encode_entities($self->jtitle).'</td>';
+    $out.=sprintf "%s",  '<td contenteditable="true">'.$self->genre.'</td><td contenteditable="true">'.$self->date.'</td>';
+    $out.=sprintf "%s",  '<td contenteditable="true">'.$self->_authstring.'</td>';
+    $out.=sprintf "%s",  '<td contenteditable="true">'.$self->atitle.'</td><td contenteditable="true">'.encode_entities($self->jtitle).'</td>';
     $out.=sprintf "%s",  '<td contenteditable="true">';
     if (defined $self->volume) {
       $out.=sprintf "%s",  $self->volume;
@@ -319,10 +333,7 @@ sub print {
     } else {
       #print "$count. ";
     }
-    $out.=sprintf "%s",  $self->genre.': '.$self->date.", ";
-    for (my $j = 1; $j <= $self->authcount; $j++) {
-      $out.=sprintf "%s",  $self->auth($j).', ';
-    }
+    $out.=sprintf "%s",  $self->genre.': '.$self->date.", ".$self->_authstring.", ";
     $out.=sprintf "%s",  "\'".$self->atitle."\'. ".$self->jtitle;
     if (defined $self->volume) {
       $out.=sprintf "%s",  ", ".$self->volume;
@@ -362,6 +373,7 @@ Bib::CrossRef - Uses crossref to robustly parse bibliometric references.
  use Bib::CrossRef;
 
 # Create a new object
+
  my $ref = Bib::CrossRef->new();
 
 # Supply some details, Bib::CrossRef will do its best to use this to derive full citation details e.g. the DOI of a document ...
@@ -372,7 +384,7 @@ Bib::CrossRef - Uses crossref to robustly parse bibliometric references.
 
  print $ref->print();
 
-article: 2013, Alessandro Checco, Douglas J. Leith, 'Learning-Based Constraint Satisfaction With Sensing Restrictions'. IEEE Journal of Selected Topics in Signal Processing, 7(5),pp811-820, DOI: http://dx.doi.org/10.1109/jstsp.2013.2251604
+ article: 2013, Alessandro Checco and Douglas J. Leith, 'Learning-Based Constraint Satisfaction With Sensing Restrictions'. IEEE Journal of Selected Topics in Signal Processing, 7(5),pp811-820, DOI: http://dx.doi.org/10.1109/jstsp.2013.2251604
 
 # Show the full citation details, in html format
 
@@ -390,7 +402,7 @@ e.g.
  $ref->sparse_text('10.1109/jstsp.2013.2251604');
  print $ref->print();
  
-article: 2013, Alessandro Checco, Douglas J. Leith, 'Learning-Based Constraint Satisfaction With Sensing Restrictions'. IEEE Journal of Selected Topics in Signal Processing, 7(5),pp811-820, DOI: http://dx.doi.org/10.1109/jstsp.2013.2251604
+ article: 2013, Alessandro Checco and Douglas J. Leith, 'Learning-Based Constraint Satisfaction With Sensing Restrictions'. IEEE Journal of Selected Topics in Signal Processing, 7(5),pp811-820, DOI: http://dx.doi.org/10.1109/jstsp.2013.2251604
 
 An attempt will be made to resolve almost any text containing citation info 
 e.g. article title only
@@ -545,7 +557,7 @@ use Bib::CrossRef qw(:all);
 
 =head1 VERSION
  
-Ver 0.06
+Ver 0.07
  
 =head1 AUTHOR
  
